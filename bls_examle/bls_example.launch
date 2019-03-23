@@ -1,0 +1,53 @@
+<launch>
+<arg name="map_size_x" default="50.0"/>
+<arg name="map_size_y" default="50.0"/>
+<arg name="map_size_z" default=" 5.0"/>
+
+<arg name="init_x" default="-10.0"/>
+<arg name="init_y" default="-10.0"/>
+<arg name="init_z" default="  2.0"/>
+
+<!-- moving obstacle  -->
+<group ns="moving_obstacle">
+
+    <node pkg = "bezier_planer" type = "moving_obstacle_node" output = "screen" name = "moving_obstacle">
+        <remap from = "~moving_command"  to = "mov_cmd"/>
+        <remap from = "~command"  to = "/position_cmd"/>
+        <remap from = "~global_map" to = "/random_forest_sensing/all_map"/>
+        <!-- <remap from = "~odom/fake_odom" to = "odom/fake_odom"/> -->
+        <remap from = "~odom/fake_odom" to = "/moving_obstacle/odom/fake_odom"/>
+        <param name="init_x" value="0.0"/>
+        <param name="init_y" value="-2.0"/>
+        <param name="init_z" value="2.0"/>
+        <param name="tar_x" value="2.0"/>
+        <param name="tar_y" value="0.0"/>
+        <param name="tar_z" value="2.0"/>
+        <param name="predictor/window_size" value="20.0" />
+        <param name="predictor/predict_dur" value="10.0" />
+    </node>
+    <node pkg="odom_visualization" name="moving_obstacle_vis" type="odom_visualization" output="screen">
+        <remap from="~odom" to="odom/fake_odom"/>
+        <param name="color/a" value="0.8"/>    
+        <param name="color/r" value="1.0"/>        
+        <param name="color/g" value="0.0"/>        
+        <param name="color/b" value="0.0"/>   
+        <param name="covariance_scale" value="100.0"/>       
+        <param name="robot_scale" value="1.0"/>   
+    </node>
+</group>
+    <node pkg = "bezier_planer" type = "bls_example_node" name = "bls_example">
+        <!-- <remap from = "~odom/fake_odom" to = "odom/fake_odom"/> -->
+    </node>  
+    <node pkg="odom_visualization" name="odom_visualization_ukf_" type="odom_visualization" output="screen">
+      <remap from="~odom" to="/odom/fake_odom"/>
+      <param name="color/a" value="0.8"/>    
+      <param name="color/r" value="0.0"/>        
+      <param name="color/g" value="0.0"/>
+      <param name="color/b" value="0.0"/>       
+      <param name="covariance_scale" value="100.0"/>       
+      <param name="robot_scale" value="1.0"/>   
+  </node>
+
+  <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find bezier_planer)/launch/rviz_config/simulation.rviz" />
+<node pkg="bezier_planer" type="goal_node.py" name="goal_publisher" output="screen"/> 
+</launch>
